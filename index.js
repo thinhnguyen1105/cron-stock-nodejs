@@ -176,7 +176,7 @@ function getRawDataFromHTML(htmlTable) {
     listTime.forEach((time, index) => {
         combineData[index] = {
             time: time,
-            priceMatch: listPrice[index].replace(' ' + subPrice[index], ''),
+            priceMatch: listPrice[index] ? listPrice[index].replace(' ' + subPrice[index], '') : '',
             qttyMatch: listVolume[index]
         }
     })

@@ -162,6 +162,7 @@ function getRawDataFromHTML(htmlTable) {
     const $ = cheerio.load(htmlTable);
     const listTime = $('.Item_DateItem').toArray().map((x) => { return $(x).text() });
     const price = $('.Item_Price10').toArray().map((x) => { return $(x).text() });
+    const subPrice = $('.Item_Price10 span').toArray().map((x) => { return $(x).text() });
     let listPrice = []
     let listVolume = []
     price.forEach((item, index) => {
@@ -175,7 +176,7 @@ function getRawDataFromHTML(htmlTable) {
     listTime.forEach((time, index) => {
         combineData[index] = {
             time: time,
-            priceMatch: listPrice[index],
+            priceMatch: listPrice[index].replace(' ' + subPrice[index], ''),
             qttyMatch: listVolume[index]
         }
     })

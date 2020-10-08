@@ -31,21 +31,23 @@ var insertStock = function (symdayid, symbol, stock) {
 
 var loopStock = function (symdayid, symbol, resultStocks) {
     while (resultStocks && resultStocks.length > 0) {
+        resultStocks.forEach(stock => {
+            var time = dateFormat(new Date(), "yyyy-mm-dd " + stock.time);
+            var request = new sql.Request();
+            request.query("select * from Detaildaily_1 where (dealtime = '" + time + "' AND  symbolid = " + symdayid + ") ",
+                function (err, results) {
+                    var count = results && results.recordset && results.recordset.length ? results.recordset : [];
+                    if (count.length == 0) {
+                        insertStock(symdayid, symbol, stock);
+                        loopStock(symdayid, symbol, resultStocks);
+                    } else {
+                        console.log('time error', time)
+                        //console.log('\x1b[33m%s\x1b[33m',symbol + ": Not new record");
+                    }
+                });
+        })
+        // var resultStock = resultStocks.shift();
 
-        var resultStock = resultStocks.shift();
-        var time = dateFormat(new Date(), "yyyy-mm-dd " + resultStock.time);
-        var request = new sql.Request();
-        request.query("select * from Detaildaily_1 where (dealtime = '" + time + "' AND  symbolid = " + symdayid + ") ",
-            function (err, results) {
-                var count = results && results.recordset && results.recordset.length ? results.recordset : [];
-                if (count.length == 0) {
-                    insertStock(symdayid, symbol, resultStock);
-                    loopStock(symdayid, symbol, resultStocks);
-                } else {
-                    console.log('time error', time)
-                    //console.log('\x1b[33m%s\x1b[33m',symbol + ": Not new record");
-                }
-            });
         break;
     }
 }
@@ -126,7 +128,7 @@ function analystData(dataStocks) {
                 time: stock.FT,
                 priceMatch: Number(stock.FMP) / 1000,
                 qttyMatch: stock.FV,
-                lenh: stock.LC && stock.LC === 'S' ? false : true
+                lenh: stock.LC && stock.LC === 'S' ? 0 : 1
             }
         })
     } return []

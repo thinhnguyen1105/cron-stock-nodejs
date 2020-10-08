@@ -11,9 +11,10 @@ async function getDataFromAPI() {
 }
 
 function analystData(dataStocks) {
+  console.log(dataStocks.length)
   return dataStocks.map(stock => {
-    const formatDate = typeof (stock.TD) === 'string' ? moment(stock.TD).format("YYYY-MM-DD") : ''
-    const convertedDate = formatDate && stock.FT ? `${formatDate} ${stock.FT}.000` : ''
+    // const formatDate = typeof (stock.TD) === 'string' ? moment(stock.TD).format("YYYY-MM-DD") : ''
+    // const convertedDate = formatDate && stock.FT ? `${formatDate} ${stock.FT}.000` : ''
     return {
       time: stock.FT,
       priceMatch: Number(stock.FMP) / 1000,
@@ -26,7 +27,7 @@ function analystData(dataStocks) {
 const cronData = async () => {
   const data = await getDataFromAPI()
   const convertedData = await analystData(data)
-  console.log('convertedData', convertedData)
+  // console.log('convertedData', convertedData)
 }
 
 cronData()

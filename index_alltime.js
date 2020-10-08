@@ -97,7 +97,7 @@ var conn = sql.connect(config, function (err) {
             //else
             //{
             //Update price volum
-            request.query("select id, symbol, active from Symbols where (active = 1)", function (err, results) {
+            request.query("select id, symbol, active from Symbols where (symbolid = 1)", function (err, results) {
                 if (err) console.log(err)
                 var symbols = results && results.recordset && results.recordset.length ? results.recordset : [];
 
@@ -124,14 +124,16 @@ async function getDataFromAPI() {
 }
 
 function analystData(dataStocks) {
-    return dataStocks.map(stock => {
-        const formatDate = typeof (stock.TD) === 'string' ? moment(stock.TD).format("YYYY-MM-DD") : ''
-        const convertedDate = formatDate && stock.FT ? `${formatDate}T${stock.FT}.000Z` : ''
-        return {
-            time: stock.FT,
-            priceMatch: Number(stock.FMP) / 1000,
-            qttyMatch: stock.FV,
-            lenh: stock.LC && stock.LC === 'S' ? false : true
-        }
-    })
+    if (dataStocks && dataStocks.length) {
+        return dataStocks.map(stock => {
+            // const formatDate = typeof (stock.TD) === 'string' ? moment(stock.TD).format("YYYY-MM-DD") : ''
+            // const convertedDate = formatDate && stock.FT ? `${formatDate}T${stock.FT}.000Z` : ''
+            return {
+                time: stock.FT,
+                priceMatch: Number(stock.FMP) / 1000,
+                qttyMatch: stock.FV,
+                lenh: stock.LC && stock.LC === 'S' ? false : true
+            }
+        })
+    } return []
 }

@@ -77,37 +77,37 @@ var conn = sql.connect(config, function (err) {
 
         //Tao gia tran, san, TC
         var request = new sql.Request();
-        setInterval(function () {
-            //today = new Date();
-            //if(today < TimeA)
-            //{
-            //    // chua den gio chay
-            //    console.log('Rinh-Vo-Chen-Luon');
-            //}
-            //else if(today > TimeB &&  today < TimeC )
-            //{
-            //    // nghi trua
-            //    console.log('Nghi trua');
-            //}
-            //else if(today > TimeD)
-            //{
-            //    // Het gio
-            //    console.log('Het gio');
-            //}
-            //else
-            //{
-            //Update price volum
-            request.query("select id, symbol, active from Symbols where (symbolid = 1)", function (err, results) {
-                if (err) console.log(err)
-                var symbols = results && results.recordset && results.recordset.length ? results.recordset : [];
+        // setInterval(function () {
+        //today = new Date();
+        //if(today < TimeA)
+        //{
+        //    // chua den gio chay
+        //    console.log('Rinh-Vo-Chen-Luon');
+        //}
+        //else if(today > TimeB &&  today < TimeC )
+        //{
+        //    // nghi trua
+        //    console.log('Nghi trua');
+        //}
+        //else if(today > TimeD)
+        //{
+        //    // Het gio
+        //    console.log('Het gio');
+        //}
+        //else
+        //{
+        //Update price volum
+        request.query("select id, symbol, active from Symbols where (id = 1)", function (err, results) {
+            if (err) console.log(err)
+            var symbols = results && results.recordset && results.recordset.length ? results.recordset : [];
 
-                symbols.forEach(function (symbol, index) {
-                    fecthData(symbol.id, symbol.symbol, index);
-                });
-                console.log('\x1b[32m%s\x1b[32m', "Update all completed: " + dateFormat(new Date(), "dd-mm-yyyy h:MM:ss"));
+            symbols.forEach(function (symbol, index) {
+                fecthData(symbol.id, symbol.symbol, index);
             });
-            //}
-        }, 5000);
+            console.log('\x1b[32m%s\x1b[32m', "Update all completed: " + dateFormat(new Date(), "dd-mm-yyyy h:MM:ss"));
+        });
+        //}
+        // }, 5000);
     }
 
 });

@@ -8,13 +8,15 @@
 		"cheerio": "^1.0.0-rc.3",
 		"dateformat": "^3.0.3",
 		"express": "^4.16.4",
+		"moment": "^2.29.1",
 		"mssql": "^5.0.3",
 		"mysql": "^2.16.0"
 	},
 	"devDependencies": {},
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"dev": "node cron_data.js"
+		"dev": "node cron_data_baoviet.js",
+		"cafef": "node cron_data_cafef.js"
 	},
 	"author": "DuongTuongQuan",
 	"license": "ISC"

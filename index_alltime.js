@@ -8,7 +8,7 @@ const moment = require('moment');
 
 const sql = require('mssql');
 var config = {
-    server: "localhost\\MSSQLSERVER2017",
+    server: "VNHAN-L129",
     user: "CKuser",
     password: "%TGB6yhn7ujm",
     database: "ck",

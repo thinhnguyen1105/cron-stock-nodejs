@@ -29,19 +29,32 @@ var insertStock = function (symdayid, symbol, stock) {
     });
 }
 
-var loopStock = function (symdayid, symbol, resultStocks) {
+var updateStock = function (resultStock, existedRecord) {
+    var existedVolume = Number(existedRecord.qttyMatch);
+    var newVolume = parseInt(Number(resultStock.qttyMatch) + existedVolume);
+    console.log('newVolume', newVolume)
+    console.log('existedRecord', existedRecord.id)
+    var request = new sql.Request();
+    request.query(`update DetailDaily_1 set volume = ${newVolume} where id = ${existedRecord.id}`, function (err, results) {
+        if (err) console.log(err)
+    });
+}
+
+var loopStock = function (symbolid, symbol, resultStocks) {
     while (resultStocks && resultStocks.length > 0) {
         var resultStock = resultStocks.shift();
         console.log('resultStock', resultStock)
         var time = dateFormat(new Date(), "yyyy-mm-dd " + resultStock.time);
         var request = new sql.Request();
-        request.query("select * from Detaildaily_1 where (dealtime = '" + time + "' AND  symbolid = " + symdayid + ") ",
+        request.query("select * from Detaildaily_1 where (dealtime = '" + time + "' AND  symbolid = " + symbolid + "' AND  lenh = " + resultStock.lenh + "' AND  price = " + resultStock.priceMatch + ") ",
             function (err, results) {
                 var count = results && results.recordset && results.recordset.length ? results.recordset : [];
                 if (count.length == 0) {
-                    insertStock(symdayid, symbol, resultStock);
-                    loopStock(symdayid, symbol, resultStocks);
+                    insertStock(symbolid, symbol, resultStock);
+                    loopStock(symbolid, symbol, resultStocks);
                 } else {
+                    const existedRecord = results.recordset[0]
+                    updateStock(resultStock, existedRecord);
                     console.log('time error', time)
                     //console.log('\x1b[33m%s\x1b[33m',symbol + ": Not new record");
                 }
@@ -117,11 +130,11 @@ async function getDataFromAPI() {
 }
 
 function analystData(dataStocks) {
-    console.log('count', dataStocks.length)
     if (dataStocks && dataStocks.length) {
         return dataStocks.map(stock => {
             // const formatDate = typeof (stock.TD) === 'string' ? moment(stock.TD).format("YYYY-MM-DD") : ''
             // const convertedDate = formatDate && stock.FT ? `${formatDate}T${stock.FT}.000Z` : ''
+
             return {
                 time: stock.FT,
                 priceMatch: Number(stock.FMP) / 1000,

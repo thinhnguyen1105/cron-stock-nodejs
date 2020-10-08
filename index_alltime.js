@@ -1,10 +1,6 @@
-﻿//const express = require('express');
-const axios = require('axios');
+﻿const axios = require('axios');
 const dateFormat = require('dateformat');
 const moment = require('moment');
-
-//var app = express();
-//   Server=localhost\SQLEXPRESS;Initial Catalog=ck;User ID=CKuser;pwd=%TGB6yhn7ujm;
 
 const sql = require('mssql');
 var config = {
@@ -22,17 +18,14 @@ var config = {
 
 
 var insertStock = function (symdayid, symbol, stock) {
-    //console.log(stock);
     var time = dateFormat(new Date(), "yyyy-mm-dd " + stock.time);
     var price = stock.priceMatch;
     var volume = parseInt(stock.qttyMatch);
-    var totalvolume = 0; //parseInt(stock.qttyMatch);
-    //var symdayid = id;
-    var insert_values_str = "'" + time + "'" + "," + price + "," + volume + "," + symdayid;
+    var lenh = stock.lenh;
+    var insert_values_str = "'" + time + "'" + "," + price + "," + volume + "," + symdayid + "," + lenh;
     var request = new sql.Request();
-    request.query("insert into DetailDaily_1 ( dealtime, price, volume, symbolid )  values (" + insert_values_str + ")", function (err, results) {
+    request.query("insert into DetailDaily_1 ( dealtime, price, volume, symbolid, lenh )  values (" + insert_values_str + ")", function (err, results) {
         if (err) console.log(err)
-        //console.log("insert new record:"+symbol);
     });
 }
 
@@ -42,7 +35,6 @@ var loopStock = function (symdayid, symbol, resultStocks) {
         var resultStock = resultStocks.shift();
         var time = dateFormat(new Date(), "yyyy-mm-dd " + resultStock.time);
         var request = new sql.Request();
-
         request.query("select * from Detaildaily_1 where (dealtime = '" + time + "' AND  symbolid = " + symdayid + ") ",
             function (err, results) {
                 var count = results && results.recordset && results.recordset.length ? results.recordset : [];
@@ -50,6 +42,7 @@ var loopStock = function (symdayid, symbol, resultStocks) {
                     insertStock(symdayid, symbol, resultStock);
                     loopStock(symdayid, symbol, resultStocks);
                 } else {
+                    console.log('time error', time)
                     //console.log('\x1b[33m%s\x1b[33m',symbol + ": Not new record");
                 }
             });

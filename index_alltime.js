@@ -43,7 +43,7 @@ var loopStock = function (symdayid, symbol, resultStocks) {
         var time = dateFormat(new Date(), "yyyy-mm-dd " + resultStock.time);
         var request = new sql.Request();
 
-        request.query("select * from Detaildaily where (dealtime = '" + time + "' AND  symbolid = " + symdayid + ") ",
+        request.query("select * from Detaildaily_1 where (dealtime = '" + time + "' AND  symbolid = " + symdayid + ") ",
             function (err, results) {
                 var count = results && results.recordset && results.recordset.length ? results.recordset : [];
                 if (count.length == 0) {

@@ -45,7 +45,7 @@ var loopStock = function (symdayid, symbol, resultStocks) {
 
         request.query("select * from Detaildaily where (dealtime = '" + time + "' AND  symbolid = " + symdayid + ") ",
             function (err, results) {
-                var count = results.recordset;
+                var count = results && results.recordset && results.recordset.length ? results.recordset : [];
                 if (count.length == 0) {
                     insertStock(symdayid, symbol, resultStock);
                     loopStock(symdayid, symbol, resultStocks);
@@ -57,7 +57,7 @@ var loopStock = function (symdayid, symbol, resultStocks) {
     }
 }
 
-var fecthData = function (symdayid, symbol, loopIndex) {
+var fecthData = async function (symdayid, symbol, loopIndex) {
     const data = await getDataFromAPI()
     const convertedData = await analystData(data)
     loopStock(symdayid, symbol, convertedData);
@@ -99,7 +99,7 @@ var conn = sql.connect(config, function (err) {
             //Update price volum
             request.query("select id, symbol, active from Symbols where (active = 1)", function (err, results) {
                 if (err) console.log(err)
-                var symbols = results.recordset;
+                var symbols = results && results.recordset && results.recordset.length ? results.recordset : [];
 
                 symbols.forEach(function (symbol, index) {
                     fecthData(symbol.id, symbol.symbol, index);

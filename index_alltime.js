@@ -124,6 +124,7 @@ async function getDataFromAPI() {
 }
 
 function analystData(dataStocks) {
+    console.log('count', dataStocks.length)
     if (dataStocks && dataStocks.length) {
         return dataStocks.map(stock => {
             // const formatDate = typeof (stock.TD) === 'string' ? moment(stock.TD).format("YYYY-MM-DD") : ''

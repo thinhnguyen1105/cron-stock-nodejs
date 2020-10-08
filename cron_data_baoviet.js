@@ -15,7 +15,7 @@ function analystData(dataStocks) {
     const formatDate = typeof (stock.TD) === 'string' ? moment(stock.TD).format("YYYY-MM-DD") : ''
     const convertedDate = formatDate && stock.FT ? `${formatDate} ${stock.FT}.000` : ''
     return {
-      time: convertedDate,
+      time: stock.FT,
       priceMatch: Number(stock.FMP) / 1000,
       qttyMatch: stock.FV,
       lenh: stock.LC ? stock.LC : ''

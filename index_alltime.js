@@ -126,12 +126,12 @@ async function getDataFromAPI() {
 function analystData(dataStocks) {
     return dataStocks.map(stock => {
         const formatDate = typeof (stock.TD) === 'string' ? moment(stock.TD).format("YYYY-MM-DD") : ''
-        const convertedDate = formatDate && stock.FT ? `${formatDate} ${stock.FT}.000` : ''
+        const convertedDate = formatDate && stock.FT ? `${formatDate}T${stock.FT}.000Z` : ''
         return {
-            time: stock.TD,
+            time: stock.FT,
             priceMatch: Number(stock.FMP) / 1000,
             qttyMatch: stock.FV,
-            lenh: stock.LC ? stock.LC : ''
+            lenh: stock.LC && stock.LC === 'S' ? false : true
         }
     })
 }

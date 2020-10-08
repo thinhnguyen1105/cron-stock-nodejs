@@ -27,7 +27,7 @@ function analystData(dataStocks) {
 const cronData = async () => {
   const data = await getDataFromAPI()
   const convertedData = await analystData(data)
-  // console.log('convertedData', convertedData)
+  console.log('convertedData', convertedData)
 }
 
 cronData()

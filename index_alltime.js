@@ -1,6 +1,5 @@
 ﻿const axios = require('axios');
 const dateFormat = require('dateformat');
-const moment = require('moment');
 
 const sql = require('mssql');
 var config = {
@@ -30,10 +29,9 @@ var insertStock = function (symdayid, symbol, stock) {
 }
 
 var updateStock = function (resultStock, existedRecord) {
-    var existedVolume = Number(existedRecord.qttyMatch);
-    var newVolume = parseInt(Number(resultStock.qttyMatch) + existedVolume);
-    console.log('newVolume', newVolume)
-    console.log('existedRecord', existedRecord.id)
+    var existedVolume = Number(existedRecord.volume);
+    var bonusVolume = Number(resultStock.qttyMatch);
+    var newVolume = bonusVolume + existedVolume;
     var request = new sql.Request();
     request.query(`update DetailDaily_1 set volume = ${newVolume} where id = ${existedRecord.id}`, function (err, results) {
         if (err) console.log(err)
@@ -43,20 +41,19 @@ var updateStock = function (resultStock, existedRecord) {
 var loopStock = function (symbolid, symbol, resultStocks) {
     while (resultStocks && resultStocks.length > 0) {
         var resultStock = resultStocks.shift();
-        console.log('resultStock', resultStock)
         var time = dateFormat(new Date(), "yyyy-mm-dd " + resultStock.time);
         var request = new sql.Request();
-        request.query("select * from Detaildaily_1 where (dealtime = '" + time + "' AND  symbolid = " + symbolid + "' AND  lenh = " + resultStock.lenh + "' AND  price = " + resultStock.priceMatch + ") ",
+        var stringSQL = "select * from Detaildaily_1 where (dealtime = '" + time + "' AND  symbolid = " + symbolid + " AND  lenh = " + resultStock.lenh + ") ";
+        request.query(stringSQL,
             function (err, results) {
                 var count = results && results.recordset && results.recordset.length ? results.recordset : [];
-                if (count.length == 0) {
+                if (count.length === 0) {
                     insertStock(symbolid, symbol, resultStock);
                     loopStock(symbolid, symbol, resultStocks);
                 } else {
                     const existedRecord = results.recordset[0]
                     updateStock(resultStock, existedRecord);
-                    console.log('time error', time)
-                    //console.log('\x1b[33m%s\x1b[33m',symbol + ": Not new record");
+                    loopStock(symbolid, symbol, resultStocks);
                 }
             });
         break;
@@ -83,43 +80,39 @@ var conn = sql.connect(config, function (err) {
 
         //Tao gia tran, san, TC
         var request = new sql.Request();
-        // setInterval(function () {
-        //today = new Date();
-        //if(today < TimeA)
-        //{
-        //    // chua den gio chay
-        //    console.log('Rinh-Vo-Chen-Luon');
-        //}
-        //else if(today > TimeB &&  today < TimeC )
-        //{
-        //    // nghi trua
-        //    console.log('Nghi trua');
-        //}
-        //else if(today > TimeD)
-        //{
-        //    // Het gio
-        //    console.log('Het gio');
-        //}
-        //else
-        //{
-        //Update price volum
-        request.query("select id, symbol, active from Symbols where (id = 1)", function (err, results) {
-            if (err) console.log(err)
-            var symbols = results && results.recordset && results.recordset.length ? results.recordset : [];
+        setInterval(function () {
+            today = new Date();
+            if (today < TimeA) {
+                // chua den gio chay
+                console.log('Rinh-Vo-Chen-Luon');
+            }
+            else if (today > TimeB && today < TimeC) {
+                // nghi trua
+                console.log('Nghi trua');
+            }
+            else if (today > TimeD) {
+                // Het gio
+                console.log('Het gio');
+            }
+            else {
+                //Update price volum
+                request.query("select id, symbol, active from Symbols where (id = 1)", function (err, results) {
+                    if (err) console.log(err)
+                    var symbols = results && results.recordset && results.recordset.length ? results.recordset : [];
 
-            symbols.forEach(function (symbol, index) {
-                fecthData(symbol.id, symbol.symbol, index);
-            });
-            console.log('\x1b[32m%s\x1b[32m', "Update all completed: " + dateFormat(new Date(), "dd-mm-yyyy h:MM:ss"));
-        });
-        //}
-        // }, 5000);
+                    symbols.forEach(function (symbol, index) {
+                        fecthData(symbol.id, symbol.symbol, index);
+                    });
+                    console.log('\x1b[32m%s\x1b[32m', "Update all completed: " + dateFormat(new Date(), "dd-mm-yyyy h:MM:ss"));
+                });
+            }
+        }, 5000);
     }
 
 });
 
 
-////////////
+//
 async function getDataFromAPI() {
     try {
         const res = await axios.get('https://online.bvsc.com.vn/datafeed/translogsnaps/BID')
@@ -132,9 +125,6 @@ async function getDataFromAPI() {
 function analystData(dataStocks) {
     if (dataStocks && dataStocks.length) {
         return dataStocks.map(stock => {
-            // const formatDate = typeof (stock.TD) === 'string' ? moment(stock.TD).format("YYYY-MM-DD") : ''
-            // const convertedDate = formatDate && stock.FT ? `${formatDate}T${stock.FT}.000Z` : ''
-
             return {
                 time: stock.FT,
                 priceMatch: Number(stock.FMP) / 1000,

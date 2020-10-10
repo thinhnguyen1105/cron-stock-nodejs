@@ -78,10 +78,10 @@ var fecthData = async function (symbolid, symbol, loopIndex) {
     const lastestTime = await getLastestTime(data)
     if (currentLastestTime[symbolid]) {
         if (lastestTime > currentLastestTime[symbolid]) {
-            currentLastestTime[symbolid] = lastestTime
-            const newData = filterNewData(data, lastestTime)
+            const newData = filterNewData(data, currentLastestTime[symbolid])
             const combineData = await combineSameData(newData)
             const convertedData = await analystData(combineData)
+            currentLastestTime[symbolid] = lastestTime
             loopStock(symbolid, symbol, convertedData);
         } else {
             console.log('lastest data no update')

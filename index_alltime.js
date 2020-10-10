@@ -1,6 +1,7 @@
 ﻿const axios = require('axios');
 const dateFormat = require('dateformat');
 const moment = require('moment');
+let currentLastestTime = 0
 
 const sql = require('mssql');
 var config = {
@@ -74,9 +75,24 @@ function combineSameData(listStocks) {
 
 var fecthData = async function (symbolid, symbol, loopIndex) {
     const data = await getDataFromAPI(symbol)
-    const combineData = await combineSameData(data)
-    const convertedData = await analystData(combineData)
-    loopStock(symbolid, symbol, convertedData);
+    const lastestTime = await getLastestTime(data)
+    if (currentLastestTime) {
+        if (lastestTime > currentLastestTime) {
+            currentLastestTime = lastestTime
+            const newData = filterNewData(data, lastestTime)
+            const combineData = await combineSameData(newData)
+            const convertedData = await analystData(combineData)
+            loopStock(symbolid, symbol, convertedData);
+        } else {
+            console.log('lastest data no update')
+        }
+    } else {
+        // query lastest time from database
+        request.query(`SELECT TOP (1) [symbolid],[dealtime] FROM [ck].[dbo].[DetailDaily_1] order by dealtime desc`, function (err, result) {
+            const lastestTimeFromDB = result && result.recordset && result.recordset.dealtime ? Number(new Date(result.recordset.dealtime).valueOf()) : 0
+            currentLastestTime = lastestTimeFromDB
+        });
+    }
 }
 
 //Connect DB
@@ -124,4 +140,23 @@ function analystData(dataStocks) {
             }
         })
     } return []
+}
+
+function getLastestTime(data) {
+    const listTime = data.map(stock => {
+        const momentDate = moment(stock.TD, 'DD.MM.YYYY');
+        const time = dateFormat(new Date(momentDate), "yyyy-mm-dd " + stock.FT);
+        return Number(new Date(time).valueOf())
+    })
+    listTime.sort((a, b) => b - a)
+    return listTime[0]
+}
+
+function filterNewData(data, lastestTime) {
+    return data.filter(stock => {
+        const momentDate = moment(stock.TD, 'DD.MM.YYYY');
+        const time = dateFormat(new Date(momentDate), "yyyy-mm-dd " + stock.FT);
+        const numberTime = Number(new Date(time).valueOf())
+        return numberTime > lastestTime
+    })
 }

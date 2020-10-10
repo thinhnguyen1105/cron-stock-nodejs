@@ -1,5 +1,7 @@
 const axios = require('axios');
 const dateFormat = require('dateformat');
+const moment = require('moment')
+let currentLastestTime = 0
 
 async function getDataFromAPI() {
   try {
@@ -43,14 +45,42 @@ function combineSameData(listStocks) {
   return arrData
 }
 
+function getLastestTime(data) {
+  const listTime = data.map(stock => {
+    const momentDate = moment(stock.TD, 'DD.MM.YYYY');
+    const time = dateFormat(new Date(momentDate), "yyyy-mm-dd " + stock.FT);
+    return Number(new Date(time).valueOf())
+  })
+  listTime.sort((a, b) => b - a)
+  return listTime[0]
+}
+
+function filterNewData(data, lastestTime) {
+  return data.filter(stock => {
+    const momentDate = moment(stock.TD, 'DD.MM.YYYY');
+    const time = dateFormat(new Date(momentDate), "yyyy-mm-dd " + stock.FT);
+    const numberTime = Number(new Date(time).valueOf())
+    return numberTime > lastestTime
+  })
+}
+
 const cronData = async () => {
   const data = await getDataFromAPI()
-  console.log('data raw', data.length)
-  const combinedData = await combineSameData(data)
-  console.log('combinedData', combinedData.length)
-  // const convertedData = await analystData(combinedData)
+  const lastestTime = await getLastestTime(data)
+  if (currentLastestTime) {
+    if (lastestTime > currentLastestTime) {
+      currentLastestTime = lastestTime
+      const newData = filterNewData(data, lastestTime)
+      // const combinedData = await combineSameData(data)
+      // const convertedData = await analystData(combinedData)
 
-  // console.log('combineData', combinedData)
+      // console.log('combineData', combinedData)
+    } else {
+      console.log('lastest data no update')
+    }
+  } else {
+    currentLastestTime = lastestTime
+  }
 }
 
 cronData()

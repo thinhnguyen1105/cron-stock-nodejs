@@ -1,7 +1,7 @@
 ﻿const axios = require('axios');
 const dateFormat = require('dateformat');
 const moment = require('moment');
-let currentLastestTime = 0
+let currentLastestTime = {}
 
 const sql = require('mssql');
 var config = {
@@ -76,9 +76,9 @@ function combineSameData(listStocks) {
 var fecthData = async function (symbolid, symbol, loopIndex) {
     const data = await getDataFromAPI(symbol)
     const lastestTime = await getLastestTime(data)
-    if (currentLastestTime) {
-        if (lastestTime > currentLastestTime) {
-            currentLastestTime = lastestTime
+    if (currentLastestTime[symbolid]) {
+        if (lastestTime > currentLastestTime[symbolid]) {
+            currentLastestTime[symbolid] = lastestTime
             const newData = filterNewData(data, lastestTime)
             const combineData = await combineSameData(newData)
             const convertedData = await analystData(combineData)
@@ -89,9 +89,9 @@ var fecthData = async function (symbolid, symbol, loopIndex) {
     } else {
         // query lastest time from database
         var request = new sql.Request();
-        request.query(`SELECT TOP (1) [symbolid],[dealtime] FROM [ck].[dbo].[DetailDaily_1] order by dealtime desc`, function (err, result) {
+        request.query(`SELECT TOP (1) symbolid,dealtime FROM DetailDaily_1 where symbolid=${symbolid} order by dealtime desc`, function (err, result) {
             const lastestTimeFromDB = result && result.recordset && result.recordset.length && result.recordset[0].dealtime ? Number(new Date(result.recordset[0].dealtime).valueOf()) : 0
-            currentLastestTime = lastestTimeFromDB
+            currentLastestTime[symbolid] = lastestTimeFromDB
         });
     }
 }

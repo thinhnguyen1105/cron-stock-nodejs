@@ -155,17 +155,19 @@ function getLastestTime(data) {
     if (!data) {
         console.log('no result data from API')
         return 0
+    } else {
+        const listTime = data.map(stock => {
+            const momentDate = moment(stock.TD, 'DD.MM.YYYY');
+            const time = dateFormat(new Date(momentDate), "yyyy-mm-dd " + stock.FT);
+            return Number(new Date(time).valueOf())
+        })
+        listTime.sort((a, b) => b - a)
+        return listTime[0]
     }
-    const listTime = data.map(stock => {
-        const momentDate = moment(stock.TD, 'DD.MM.YYYY');
-        const time = dateFormat(new Date(momentDate), "yyyy-mm-dd " + stock.FT);
-        return Number(new Date(time).valueOf())
-    })
-    listTime.sort((a, b) => b - a)
-    return listTime[0]
 }
 
 function filterNewData(data, lastestTime) {
+    if (!data) return []
     return data.filter(stock => {
         const momentDate = moment(stock.TD, 'DD.MM.YYYY');
         const time = dateFormat(new Date(momentDate), "yyyy-mm-dd " + stock.FT);

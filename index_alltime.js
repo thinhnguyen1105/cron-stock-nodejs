@@ -135,6 +135,7 @@ async function getDataFromAPI(symbol) {
         return res.data.d
     } catch (error) {
         console.log(error)
+        return []
     }
 }
 

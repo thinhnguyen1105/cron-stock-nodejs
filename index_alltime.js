@@ -114,7 +114,7 @@ var conn = sql.connect(config, function (err) {
         var request = new sql.Request();
         setInterval(function () {
             //Update price volum
-            request.query("select id, symbol, active from Symbols where (active = 1)", function (err, results) {
+            request.query("select id, symbol, active from Symbols where (id = 105)", function (err, results) {
                 if (err) console.log(err)
                 var symbols = results && results.recordset && results.recordset.length ? results.recordset : [];
 

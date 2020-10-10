@@ -88,6 +88,7 @@ var fecthData = async function (symbolid, symbol, loopIndex) {
         }
     } else {
         // query lastest time from database
+        var request = new sql.Request();
         request.query(`SELECT TOP (1) [symbolid],[dealtime] FROM [ck].[dbo].[DetailDaily_1] order by dealtime desc`, function (err, result) {
             const lastestTimeFromDB = result && result.recordset && result.recordset.dealtime ? Number(new Date(result.recordset.dealtime).valueOf()) : 0
             currentLastestTime = lastestTimeFromDB

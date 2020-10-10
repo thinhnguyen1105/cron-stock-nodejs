@@ -54,6 +54,7 @@ var loopStock = function (symbolid, symbol, resultStocks) {
 }
 
 function combineSameData(listStocks) {
+    if (!listStocks) return []
     let data = {}
     let arrData = []
     listStocks.forEach(stock => {

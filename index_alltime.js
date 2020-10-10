@@ -27,7 +27,7 @@ var insertStock = function (symdayid, symbol, stock) {
     var lenh = stock.lenh;
     var insert_values_str = "'" + time + "'" + "," + price + "," + volume + "," + symdayid + "," + lenh;
     var request = new sql.Request();
-    request.query("insert into DetailDaily ( dealtime, price, volume, symbolid, lenh )  values (" + insert_values_str + ")", function (err, results) {
+    request.query("insert into DetailDaily_1 ( dealtime, price, volume, symbolid, lenh )  values (" + insert_values_str + ")", function (err, results) {
         if (err) console.log(err)
     });
 }
@@ -40,7 +40,7 @@ var loopStock = function (symbolid, symbol, resultStocks) {
         var time = dateFormat(new Date(momentDate), "yyyy-mm-dd " + resultStock.time);
 
         var request = new sql.Request();
-        var stringSQL = "select * from DetailDaily where (dealtime = '" + time + "' AND  symbolid = " + symbolid + " AND  lenh = " + resultStock.lenh + " AND price = " + resultStock.priceMatch + ") ";
+        var stringSQL = "select * from DetailDaily_1 where (dealtime = '" + time + "' AND  symbolid = " + symbolid + " AND  lenh = " + resultStock.lenh + " AND price = " + resultStock.priceMatch + ") ";
         request.query(stringSQL,
             function (err, results) {
                 var count = results && results.recordset && results.recordset.length ? results.recordset : [];

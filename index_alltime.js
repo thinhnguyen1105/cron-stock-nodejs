@@ -152,6 +152,10 @@ function analystData(dataStocks) {
 }
 
 function getLastestTime(data) {
+    if (!data) {
+        console.log('no result data from API')
+        return 0
+    }
     const listTime = data.map(stock => {
         const momentDate = moment(stock.TD, 'DD.MM.YYYY');
         const time = dateFormat(new Date(momentDate), "yyyy-mm-dd " + stock.FT);

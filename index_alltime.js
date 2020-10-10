@@ -89,9 +89,14 @@ var fecthData = async function (symbolid, symbol, loopIndex) {
     } else {
         // query lastest time from database
         var request = new sql.Request();
-        request.query(`SELECT TOP (1) symbolid,dealtime FROM DetailDaily_1 where symbolid=${symbolid} order by dealtime desc`, function (err, result) {
+        request.query(`SELECT TOP (1) symbolid,dealtime FROM DetailDaily_1 where symbolid=${symbolid} order by dealtime desc`, async function (err, result) {
             const lastestTimeFromDB = result && result.recordset && result.recordset.length && result.recordset[0].dealtime ? Number(new Date(result.recordset[0].dealtime).valueOf()) : 0
             currentLastestTime[symbolid] = lastestTimeFromDB
+            if (!currentLastestTime[symbolid]) {
+                const combineData = await combineSameData(data)
+                const convertedData = await analystData(combineData)
+                loopStock(symbolid, symbol, convertedData);
+            }
         });
     }
 }

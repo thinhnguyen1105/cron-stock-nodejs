@@ -133,8 +133,8 @@ async function getDataFromAPI(symbol) {
     try {
         const res = await axios.get('https://online.bvsc.com.vn/datafeed/translogsnaps/' + symbol.toUpperCase())
         return res.data.d
-    } catch (error) {
-        console.log(error)
+    } catch () {
+        console.log('Khong lay duoc du lieu tu API')
         return []
     }
 }

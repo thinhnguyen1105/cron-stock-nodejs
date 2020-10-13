@@ -42,10 +42,10 @@ sql.connect(config, function (err) {
                 // else if (today > TimeD)
                 //     console.log('Het gio');
                 // else {
-                symbols.forEach(function (symbol) {
+                symbols.forEach(function (symbol, index) {
                     setTimeout(() => {
                         fetchData(symbol.id, symbol.symbol);
-                    }, 10000);
+                    }, 10000 * index);
                 });
                 console.log('\x1b[32m%s\x1b[32m', "Update all symbols completed: " + dateFormat(new Date(), "dd-mm-yyyy h:MM:ss"));
                 // }

@@ -33,22 +33,28 @@ sql.connect(config, function (err) {
             var TimeC = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 13, 0, 0);
             var TimeD = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 15, 3, 3);
             // loop symbols and save to database
+
+            let isDoneLoop = true
             setInterval(function () {
-                // today = new Date();
-                // if (today < TimeA)
-                //     console.log('Rinh-Vo-Chen-Luon');
-                // else if (today > TimeB && today < TimeC)
-                //     console.log('Nghi trua');
-                // else if (today > TimeD)
-                //     console.log('Het gio');
-                // else {
-                symbols.forEach(function (symbol, index) {
-                    setTimeout(() => {
-                        fetchData(symbol.id, symbol.symbol);
-                    }, 10000 * index);
-                });
-                console.log('\x1b[32m%s\x1b[32m', "Update all symbols completed: " + dateFormat(new Date(), "dd-mm-yyyy h:MM:ss"));
-                // }
+                if (isDoneLoop) {
+                    isDoneLoop = false
+                    // today = new Date();
+                    // if (today < TimeA)
+                    //     console.log('Rinh-Vo-Chen-Luon');
+                    // else if (today > TimeB && today < TimeC)
+                    //     console.log('Nghi trua');
+                    // else if (today > TimeD)
+                    //     console.log('Het gio');
+                    // else {
+                    symbols.forEach(function (symbol, index) {
+                        setTimeout(() => {
+                            fetchData(symbol.id, symbol.symbol);
+                            if (index === (symbols.length - 1)) isDoneLoop = true
+                        }, 10000 * index);
+                    });
+                    // }
+                    console.log('\x1b[32m%s\x1b[32m', "Update all symbols completed: " + dateFormat(new Date(), "dd-mm-yyyy h:MM:ss"));
+                }
             }, 10000);
         });
 

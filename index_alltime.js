@@ -62,42 +62,45 @@ sql.connect(config, function (err) {
 
 });
 
+async function executeData(symbolid, data) {
+    const lastestTime = await getLastestTimeFromAPI(data)
+    console.log('4. lastestTimeFromAPI', lastestTime)
+    if (currentLastestTime[symbolid]) {
+        if (lastestTime > currentLastestTime[symbolid]) {
+            const newData = filterNewData(data, currentLastestTime[symbolid])
+            const combineData = await combineSameData(newData)
+            const convertedData = await analystData(combineData)
+            console.log('5. count converted data:', convertedData.length)
+            loopStock(symbolid, convertedData);
+            currentLastestTime[symbolid] = lastestTime
+        }
+        else { console.log('dont have new time') }
+    } else {
+        // query lastest time from database
+        var request = new sql.Request();
+        request.query(`SELECT TOP (1) symbolid,dealtime FROM DetailDaily where symbolid=${symbolid} order by dealtime desc`, async function (err, result) {
+            const lastestTimeFromDB = result && result.recordset && result.recordset.length ? result.recordset[0].dealtime : undefined
+            console.log('getLastestTimeFromDB')
+            if (lastestTimeFromDB) {
+                let lastestTimeFromDBTypeDate = new Date(lastestTimeFromDB)
+                const vnTime = lastestTimeFromDBTypeDate.setHours(lastestTimeFromDBTypeDate.getHours() - 7);
+                currentLastestTime[symbolid] = vnTime
+                console.log('setCurrentLastestTimeFromDB', currentLastestTime[symbolid])
+                executeData(symbolid, data)
+            } else {
+                console.log('database empty, update all new data !')
+                const combineData = await combineSameData(data)
+                const convertedData = await analystData(combineData)
+                loopStock(symbolid, convertedData);
+            }
+        });
+    }
+}
+
 let fetchData = async function (symbolid, symbol) {
     const data = await getDataFromAPI(symbol)
     console.log('3. get data from API success, count:', data.length)
-    if (data && data.length) {
-        const lastestTime = await getLastestTimeFromAPI(data)
-        console.log('4. lastestTimeFromAPI', lastestTime)
-        if (currentLastestTime[symbolid]) {
-            if (lastestTime > currentLastestTime[symbolid]) {
-                const newData = filterNewData(data, currentLastestTime[symbolid])
-                const combineData = await combineSameData(newData)
-                const convertedData = await analystData(combineData)
-                console.log('5. count converted data:', convertedData.length)
-                loopStock(symbolid, convertedData);
-                currentLastestTime[symbolid] = lastestTime
-            }
-            else { console.log('dont have new time') }
-        } else {
-            // query lastest time from database
-            var request = new sql.Request();
-            request.query(`SELECT TOP (1) symbolid,dealtime FROM DetailDaily where symbolid=${symbolid} order by dealtime desc`, async function (err, result) {
-                const lastestTimeFromDB = result && result.recordset && result.recordset.length ? result.recordset[0].dealtime : undefined
-                console.log('getLastestTimeFromDB')
-                if (lastestTimeFromDB) {
-                    let lastestTimeFromDBTypeDate = new Date(lastestTimeFromDB)
-                    const vnTime = lastestTimeFromDBTypeDate.setHours(lastestTimeFromDBTypeDate.getHours() - 7);
-                    currentLastestTime[symbolid] = vnTime
-                    console.log('setCurrentLastestTimeFromDB', currentLastestTime[symbolid])
-                } else {
-                    console.log('database empty, update all new data !')
-                    const combineData = await combineSameData(data)
-                    const convertedData = await analystData(combineData)
-                    loopStock(symbolid, convertedData);
-                }
-            });
-        }
-    }
+    if (data && data.length) executeData(symbolid, data)
 }
 
 async function getDataFromAPI(symbol) {
